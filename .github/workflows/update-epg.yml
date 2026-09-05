@@ -1,0 +1,33 @@
+name: Update Tivione EPG
+
+on:
+  schedule:
+    - cron: "15 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-epg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository laden
+        uses: actions/checkout@v4
+
+      - name: Python installieren
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: EPG erzeugen
+        run: python generate_epg.py
+
+      - name: Aktualisierte EPG speichern
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add tivione_epg.xml.gz
+          git diff --cached --quiet || git commit -m "Automatisches EPG Update"
+          git push
